@@ -3,12 +3,140 @@ const sequelize = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 const User = require('./UserModel');
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Music:
+ *       type: object
+ *       required:
+ *         - id
+ *         - name
+ *         - description
+ *         - link
+ *         - createdAt
+ *         - updatedAt
+ *       properties:
+ *         id:
+ *           type: number
+ *           description: Unique music identifier
+ *           example: 1
+ *         name:
+ *           type: string
+ *           description: Name of the music
+ *           example: "Billie Jean"
+ *         description:
+ *           type: string
+ *           description: Music description
+ *           example: "Michael Jackson classic, released in 1982"
+ *         link:
+ *           type: string
+ *           description: Music link
+ *           example: "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Date of creation of the music
+ *           example: "2024-03-24T19:34:02.090Z"
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Date of last music update
+ *           example: "2024-03-24T19:34:02.090Z"
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     MusicList:
+ *       type: object
+ *       properties:
+ *         totalMusics:
+ *           type: integer
+ *           description: Total number of musics
+ *           example: 0
+ *         totalPages:
+ *           type: integer
+ *           description: Total number of pages available
+ *           example: 0
+ *         page:
+ *           type: integer
+ *           description: Current page number
+ *           example: 1
+ *         limit:
+ *           type: integer
+ *           description: Limit of musics per page
+ *           example: 5
+ *         data:
+ *           type: array
+ *           description: Array of music objects
+ *           items:
+ *             $ref: "#/components/schemas/Music"
+ *           example: []
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     MusicUpdate:
+ *       type: object
+ *       required:
+ *         - name
+ *         - description
+ *         - link
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Name of the music
+ *           example: "Billie Jean"
+ *         description:
+ *           type: string
+ *           description: Music description
+ *           example: "Michael Jackson classic, released in 1982"
+ *         link:
+ *           type: string
+ *           description: Music link
+ *           example: "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     MusicInsert:
+ *       type: object
+ *       required:
+ *         - name
+ *         - description
+ *         - link
+ *         - category
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Name of the music
+ *           example: "Billie Jean"
+ *         description:
+ *           type: string
+ *           description: Music description
+ *           example: "Michael Jackson classic, released in 1982"
+ *         link:
+ *           type: string
+ *           description: Music link
+ *           example: "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+ *         category:
+ *           type: string
+ *           description: Category that this music fits into
+ *           example: "Pop"
+ */
+
 const Music = sequelize.define('music', {
   id: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     primaryKey: true,
     allowNull: false,
-    defaultValue: () => uuidv4(),
+    autoIncrement: true,
   },
   name: {
     type: DataTypes.STRING,

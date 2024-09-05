@@ -2,11 +2,17 @@ const Music = require('../models/MusicModel');
 const sequelize = require('../config/database');
 
 class MusicService {
-  static async getMusics(user_id) {
+  static async getUserMusics(user_id, limit, skip) {
+    const limitAllowed = [5, 10, 30];
+    if (!limitAllowed.includes(limit)) limit = 5;
+    const offset = (skip - 1) * limit;
+
     try {
-      const musics = await Music.findAll({
+      const musics = await Music.findAndCountAll({
         where: { userId: user_id },
         association: 'user',
+        limit,
+        offset,
       });
       return { musics, error: null };
     } catch (error) {
@@ -15,9 +21,16 @@ class MusicService {
     }
   }
 
-  static async getAllMusics() {
+  static async getAllMusics(limit, skip) {
+    const limitAllowed = [5, 10, 30];
+    if (!limitAllowed.includes(limit)) limit = 5;
+    const offset = (skip - 1) * limit;
+
     try {
-      const musics = await Music.findAll();
+      const musics = await Music.findAndCountAll({
+        limit,
+        offset,
+      });
       return { musics, error: null };
     } catch (error) {
       console.error('Error retrieving music: ', error);
@@ -25,14 +38,10 @@ class MusicService {
     }
   }
 
-  static async getMusicById(music_id, user_id) {
+  static async getMusicById(music_id) {
     try {
       const music = await Music.findOne({
-        where: {
-          id: music_id,
-          userId: user_id,
-        },
-        association: 'user',
+        where: { id: music_id },
       });
       return { music, error: null };
     } catch (error) {
@@ -67,10 +76,10 @@ class MusicService {
       });
       music.set({ name, description, link });
       await music.save();
-      return { deletedMusic: music, error: null };
+      return { updatedMusic: music, error: null };
     } catch (error) {
       console.log('Error updating music:', error);
-      return { deletedMusic: null, error: 'Internal server error' };
+      return { updatedMusic: null, error: 'Internal server error' };
     }
   }
 
