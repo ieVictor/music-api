@@ -9,11 +9,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-sequelize.sync({ force: true }).then(async () => {
+sequelize.sync().then(async () => {
   console.log('Database created! 📂');
 })
 
 app.use('/user', userRoutes);
+app.use('/music', musicRoutes);
 
 
 module.exports = app;
