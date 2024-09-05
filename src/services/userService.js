@@ -2,9 +2,16 @@ const User = require('../models/UserModel');
 const bcrypt = require('bcrypt');
 
 class UserService {
-  static async getUsers() {
+  static async getUsers(limit, skip) {
+    const limitAllowed = [5, 10, 30];
+    if (!limitAllowed.includes(limit)) limit = 5;
+    const offset = (skip - 1) * limit;
+
     try {
-      const users = await User.findAll();
+      const users = await User.findAndCountAll({
+        limit,
+        skip,
+      });
       return { users, error: null };
     } catch (error) {
       console.error('Error retrieving users: ', error);
@@ -34,6 +41,20 @@ class UserService {
     } catch (error) {
       console.error('Error creating user: ', error);
       return { createdUserId: null, error: 'Internal Server Error' };
+    }
+  }
+
+  static async createAdmin(username, password) {
+    try {
+      const user = await User.create({
+        username,
+        password,
+        isAdmin: true,
+      });
+      return { createdAdminId: user.id, error: null };
+    } catch (error) {
+      console.error('Error creating admin user: ', error);
+      return { createdAdminId: null, error: 'Internal Server Error' };
     }
   }
 
