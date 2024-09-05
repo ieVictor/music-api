@@ -1,0 +1,20 @@
+{
+  "name": "music-api",
+  "version": "1.0.0",
+  "description": "Project 4 Web-Backend UTFPR",
+  "main": "./src/app.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "dev": "nodemon ./src/server.js"
+  },
+  "author": "Victor Gabriel Lucio",
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.4",
+    "sequelize": "^6.37.3",
+    "sqlite3": "^5.1.7"
+  }
+}
