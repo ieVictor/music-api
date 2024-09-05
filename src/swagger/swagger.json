@@ -1,0 +1,1326 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API RESTful - Musics",
+    "version": "1.0.0",
+    "description": "This project consists of building a **RESTful API using Node.js and Express**, with integration to the **SQL** database, to create a system that allows users to manage **musics**.\n\n",
+    "license": {
+      "name": "MIT License",
+      "url": "https://github.com/ieVictor/music-api/blob/main/LICENSE"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "jwt": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "To authenticate, pass the JWT token in the format **Bearer _token_**."
+      }
+    },
+    "schemas": {
+      "Music": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "link",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique music identifier",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the music",
+            "example": "Billie Jean"
+          },
+          "description": {
+            "type": "string",
+            "description": "Music description",
+            "example": "Michael Jackson classic, released in 1982"
+          },
+          "link": {
+            "type": "string",
+            "description": "Music link",
+            "example": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of creation of the music",
+            "example": "2024-03-24T19:34:02.090Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of last music update",
+            "example": "2024-03-24T19:34:02.090Z"
+          }
+        }
+      },
+      "MusicList": {
+        "type": "object",
+        "properties": {
+          "totalMusics": {
+            "type": "integer",
+            "description": "Total number of musics",
+            "example": 0
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total number of pages available",
+            "example": 0
+          },
+          "page": {
+            "type": "integer",
+            "description": "Current page number",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Limit of musics per page",
+            "example": 5
+          },
+          "data": {
+            "type": "array",
+            "description": "Array of music objects",
+            "items": {
+              "$ref": "#/components/schemas/Music"
+            },
+            "example": []
+          }
+        }
+      },
+      "MusicUpdate": {
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "link"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the music",
+            "example": "Billie Jean"
+          },
+          "description": {
+            "type": "string",
+            "description": "Music description",
+            "example": "Michael Jackson classic, released in 1982"
+          },
+          "link": {
+            "type": "string",
+            "description": "Music link",
+            "example": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+          }
+        }
+      },
+      "MusicInsert": {
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "link",
+          "category"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the music",
+            "example": "Billie Jean"
+          },
+          "description": {
+            "type": "string",
+            "description": "Music description",
+            "example": "Michael Jackson classic, released in 1982"
+          },
+          "link": {
+            "type": "string",
+            "description": "Music link",
+            "example": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category that this music fits into",
+            "example": "Pop"
+          }
+        }
+      },
+      "DeleteSuccess": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "description": "Delete success message",
+            "example": "Successfully deleted"
+          }
+        }
+      },
+      "BadRequest": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "description": "Invalid request. Some parameters may be missing or invalid.",
+            "example": "Some parameters may be missing or invalid"
+          }
+        }
+      },
+      "Unauthorized": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "description": "Unauthorized. The JWT token was not provided or is invalid.",
+            "example": "JWT token not provided or invalid"
+          }
+        }
+      },
+      "Forbidden": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "description": "Forbidden. The user does not have permission to access the requested resource.",
+            "example": "You do not have permission to access the requested resource"
+          }
+        }
+      },
+      "NotFound": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "description": "No data found. The requested resource does not exist",
+            "example": "No data found"
+          }
+        }
+      },
+      "InternalServerError": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "description": "Internal error when handling data in the service",
+            "example": "Internal Server Error"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "password",
+          "isAdmin"
+        ],
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "Unique user identifier",
+            "example": 1
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user",
+            "example": "john_doe"
+          },
+          "password": {
+            "type": "string",
+            "description": "Hashed password of the user",
+            "example": "$2b$10$zTgR.yZzZpjM7JZf6Afg0uOdD8PS9Cz5g/2A4U2FQnVEMmO5TfAzu"
+          },
+          "isAdmin": {
+            "type": "boolean",
+            "description": "Indicates whether the user has admin privileges",
+            "example": false
+          }
+        }
+      },
+      "UserList": {
+        "type": "object",
+        "properties": {
+          "totalMusics": {
+            "type": "integer",
+            "description": "Total number of users",
+            "example": 0
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total number of pages available",
+            "example": 0
+          },
+          "page": {
+            "type": "integer",
+            "description": "Current page number",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Limit of users per page",
+            "example": 5
+          },
+          "data": {
+            "type": "array",
+            "description": "Array of music objects",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
+            "example": []
+          }
+        }
+      },
+      "UserInsert": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username for the new user",
+            "example": "john_doe"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password for the new user",
+            "example": "password123"
+          }
+        }
+      },
+      "UserUpdate": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Updated username for the user",
+            "example": "john_doe"
+          },
+          "password": {
+            "type": "string",
+            "description": "Updated password for the user",
+            "example": "newpassword123"
+          },
+          "isAdmin": {
+            "type": "boolean",
+            "description": "Indicates if the user is an admin",
+            "example": true
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "User login",
+        "description": "Authenticates a user and returns a JWT token upon successful login.",
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "user_login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Username of the user",
+                    "example": "john_doe"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "User password",
+                    "example": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success! JWT token returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "Success message",
+                      "example": "Success!"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "JWT token",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "Error message",
+                      "example": "Invalid Credentials"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/install": {
+      "get": {
+        "summary": "Install the database and seed data",
+        "description": "Initializes the database, creates user and music tables, and inserts sample data.",
+        "tags": [
+          "Install"
+        ],
+        "operationId": "install_database",
+        "responses": {
+          "200": {
+            "description": "Database installed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "msg": {
+                      "type": "string",
+                      "description": "Success message",
+                      "example": "Database installed successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "users": {
+                          "type": "array",
+                          "description": "List of users created",
+                          "items": {
+                            "$ref": "#/components/schemas/User"
+                          }
+                        },
+                        "musics": {
+                          "type": "array",
+                          "description": "List of musics created",
+                          "items": {
+                            "$ref": "#/components/schemas/Music"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Database installation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message",
+                      "example": "Database installation failed: error details"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/music": {
+      "get": {
+        "summary": "View all musics",
+        "description": "Returns information about all songs",
+        "tags": [
+          "Music"
+        ],
+        "operationId": "get_all_music",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new music",
+        "description": "Creates a new music based on the data provided in the request body.",
+        "tags": [
+          "Music"
+        ],
+        "operationId": "create_music",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MusicInsert"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Music"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/music/user?id={userId}": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "query",
+          "required": true,
+          "description": "ID of the user",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "View musics songs by user id",
+        "description": "Returns user musics information by id",
+        "tags": [
+          "Music"
+        ],
+        "operationId": "get_musics_by_user_id",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/music/{musicId}": {
+      "parameters": [
+        {
+          "name": "musicId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the music to be deleted",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "View music by id",
+        "description": "Returns music information by id",
+        "tags": [
+          "Music"
+        ],
+        "operationId": "get_music_by_id",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Music"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update song",
+        "description": "Updates the information of the desired song, as long as the user who is editing it is the same one who created it",
+        "tags": [
+          "Music"
+        ],
+        "operationId": "update_music",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MusicUpdate"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Music"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove music",
+        "description": "Deletes a music, as long as the user performing the deletion is the same one who created it",
+        "tags": [
+          "Music"
+        ],
+        "operationId": "delete_music",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "summary": "Get all users",
+        "description": "Retrieves a list of all users. Requires admin privileges.",
+        "tags": [
+          "User"
+        ],
+        "operationId": "get_all_users",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new user",
+        "description": "Creates a new user with the provided data.",
+        "tags": [
+          "User"
+        ],
+        "operationId": "create_user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInsert"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{userId}": {
+      "put": {
+        "summary": "Update user",
+        "description": "Updates information for a specific user by their ID.",
+        "tags": [
+          "User"
+        ],
+        "operationId": "update_user",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "ID of the user to be updated",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/admin": {
+      "post": {
+        "summary": "Create a new admin user",
+        "description": "Creates a new admin user. Requires admin privileges.",
+        "tags": [
+          "User"
+        ],
+        "operationId": "create_admin",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInsert"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "delete": {
+        "summary": "Delete user by ID",
+        "description": "Deletes a user by their ID.",
+        "tags": [
+          "User"
+        ],
+        "operationId": "delete_user",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "description": "ID of the user to be deleted",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication routes"
+    },
+    {
+      "name": "Install",
+      "description": "Routes for database installation and setup"
+    },
+    {
+      "name": "Music",
+      "description": "Routes for music manipulation"
+    },
+    {
+      "name": "User",
+      "description": "Routes for user manipulation"
+    }
+  ]
+}
