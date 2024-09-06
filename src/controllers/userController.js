@@ -1,10 +1,13 @@
 const UserService = require('../services/userService');
-const isValidUID = require('../utils/validate');
+const MusicService = require('../services/musicService');
 
 class UserController {
   static async getUsers(req, res) {
     const { page = 1, limit = 5 } = req.query;
-    const { users, error: getUsersError } = await UserService.getUsers();
+    const { users, error: getUsersError } = await UserService.getUsers(
+      Number(limit),
+      Number(page)
+    );
     if (getUsersError) return res.status(500).json({ msg: getUsersError });
 
     res.status(200).json({
@@ -13,6 +16,60 @@ class UserController {
       page: Number(page),
       limit: Number(limit),
       data: users.rows,
+    });
+  }
+
+  static async getUserById(req, res) {
+    const { page = 1, limit = 5 } = req.query;
+    const userId = req.params.userId;
+
+    if (!userId) res.status(403).json({ msg: 'Please provide a user id!' });
+
+    const { user, error: getUserError } = await UserService.getUserById(userId);
+    if (!user) return res.status(500).json({ msg: 'No data found' });
+    const { musics, error: getMusicsError } = await MusicService.getUserMusics(
+      user.id,
+      Number(limit),
+      Number(page)
+    );
+
+    if (getUserError) return res.status(500).json({ msg: getUserError });
+    if (getMusicsError) return res.status(500).json({ msg: getMusicsError });
+
+    res.status(200).json({
+      username: user.username,
+      musics: {
+        totalMusics: musics.count,
+        totalPages: Math.ceil(musics.count / limit),
+        page: Number(page),
+        limit: Number(limit),
+        data: musics.rows,
+      },
+    });
+  }
+
+  static async getUserFavoriteMusics(req, res) {
+    const { page = 1, limit = 5 } = req.query;
+    const userId = req.user.id;
+    if (!userId)
+      return res
+        .status(401)
+        .json({ msg: 'You need to be logged in to acesss this feature!' });
+
+    const { musics, error: getMusicsError } =
+      await UserService.getUserFavoriteMusics(
+        userId,
+        Number(limit),
+        Number(page)
+      );
+    if (getMusicsError) return res.status(500).json({ msg: getMusicsError });
+
+    res.status(200).json({
+      totalMusics: musics.count,
+      totalPages: Math.ceil(musics.count / limit),
+      page: Number(page),
+      limit: Number(limit),
+      data: musics.rows,
     });
   }
 
@@ -77,12 +134,13 @@ class UserController {
 
   static async deleteUser(req, res) {
     const userId = req.params.userId;
+    const claimer = req.user;
 
     const { user, error: getUserError } = await UserService.getUserById(userId);
     if (getUserError) return res.status(404).json({ msg: getUserError });
     if (!user) return res.status(404).json({ msg: 'No data found' });
 
-    if (creator.id !== user.id && !creator.isAdmin)
+    if (claimer.id !== user.id && !claimer.isAdmin)
       return res
         .status(403)
         .json({ msg: 'You cannot delete informations of another user!' });

@@ -52,6 +52,84 @@ router.get('/', authMiddleware, authAdmin, UserController.getUsers);
 /**
  * @swagger
  * /user/{userId}:
+ *   parameters:
+ *     - name: userId
+ *       in: path
+ *       required: true
+ *       description: ID of the user
+ *       schema:
+ *         type: integer
+ *   get:
+ *     summary: Get user informations
+ *     description: Retrieves user informations & his songs. 
+ *     tags:
+ *       - User
+ *     operationId: get_all_user_by_id
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UserInformations"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Unauthorized"
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Forbidden"
+ *       500:
+ *         description: InternalServerError
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalServerError"
+ */
+router.get('/:userId', UserController.getUserById);
+
+/**
+ * @swagger
+ * /user/music/favorites:
+ *   get:
+ *     summary: Get logged user favorite musics
+ *     description: Retrieves a list of user favorite musics.
+ *     tags:
+ *       - User
+ *     operationId: get_all_user_favorite_musics
+ *     security:
+ *       - jwt: []
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MusicList"
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Forbidden"
+ *       500:
+ *         description: InternalServerError
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalServerError"
+ */
+
+router.get('/music/favorites', authMiddleware, UserController.getUserFavoriteMusics);
+
+/**
+ * @swagger
+ * /user/{userId}:
  *   put:
  *     summary: Update user
  *     description: Updates information for a specific user by their ID.
@@ -152,7 +230,7 @@ router.post('/', UserController.createUser);
 
 /**
  * @swagger
- * /users/admin:
+ * /user/admin:
  *   post:
  *     summary: Create a new admin user
  *     description: Creates a new admin user. Requires admin privileges.
@@ -203,7 +281,7 @@ router.post('/admin', authMiddleware, authAdmin, UserController.createAdmin);
 
 /**
  * @swagger
- * /users/{userId}:
+ * /user/{userId}:
  *   delete:
  *     summary: Delete user by ID
  *     description: Deletes a user by their ID.

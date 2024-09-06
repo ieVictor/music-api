@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-sequelize.sync({ force: true }).then(async () => {
+sequelize.sync().then(async () => {
   console.log('Database connected! 📂');
 })
 
@@ -22,7 +22,7 @@ app.use('/music', musicRoutes);
 app.use('/login', authRoutes);
 app.use('/install', installRoutes);
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerStyle));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerStyle));
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpecJson, swaggerStyle));
 
 module.exports = app;

@@ -1,4 +1,5 @@
 const User = require('../models/UserModel');
+const Music = require('../models/MusicModel');
 const bcrypt = require('bcrypt');
 
 class UserService {
@@ -27,6 +28,24 @@ class UserService {
     } catch (error) {
       console.error('Error retrieving user by id: ', error);
       return { user: null, error: 'Internal Server Error' };
+    }
+  }
+
+  static async getUserFavoriteMusics(user_id, limit, skip) {
+    const limitAllowed = [5, 10, 30];
+    if (!limitAllowed.includes(limit)) limit = 5;
+    const offset = (skip - 1) * limit;
+
+    try {
+      const musics = await Music.findAndCountAll({
+        where: { userId: user_id, favorite: true },
+        limit: limit,
+        offset
+      })
+      return { musics, error: null };
+    } catch (error) {
+      console.error("Error retrieving user favorite musics: ", error);
+      return { musics: null, error: 'Internal Server Error' };
     }
   }
 

@@ -49,16 +49,16 @@ router.get('/', MusicController.getAllMusics);
 
 /**
  * @swagger
- * /music/user?id={userId}:
+ * /music/user/{userId}:
  *   parameters:
  *     - name: userId
- *       in: query
+ *       in: path
  *       required: true
  *       description: ID of the user
  *       schema:
  *         type: integer
  *   get:
- *     summary: View musics songs by user id
+ *     summary: View musics by user id
  *     description: Returns user musics information by id
  *     tags:
  *       - Music
@@ -101,7 +101,56 @@ router.get('/', MusicController.getAllMusics);
  *             schema:
  *               $ref: "#/components/schemas/InternalServerError"
  */
-router.get('/user', MusicController.getUserMusics);
+router.get('/user/:userId', MusicController.getUserMusics);
+
+/**
+ * @swagger
+ * /music/user:
+ *   get:
+ *     summary: View logged in user musics 
+ *     description: Returns logged in user musics information 
+ *     tags:
+ *       - Music
+ *     operationId: get_musics_by_user_id
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MusicList"
+ *       400:
+ *         description: BadRequest
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadRequest"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Unauthorized"
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Forbidden"
+ *       404:
+ *         description: NotFound
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/NotFound"
+ *       500:
+ *         description: InternalServerError
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalServerError"
+ */
+router.get('/user', authMiddleware, MusicController.getLoggedUserMusics);
 
 /**
  * @swagger

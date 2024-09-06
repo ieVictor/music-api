@@ -52,12 +52,13 @@ class MusicService {
 
   static async createMusic(data, userId) {
     try {
-      const { name, description, link } = data;
+      const { name, description, link, favorite } = data;
       const music = await Music.create({
         name,
         description,
         link,
         userId,
+        favorite
       });
       return { createdMusicId: music.id, error: null };
     } catch (error) {
@@ -68,13 +69,13 @@ class MusicService {
 
   static async updateMusic(music_id, data, user_id) {
     try {
-      const { name, description, link } = data;
+      const { name, description, link, favorite } = data;
 
       const music = await Music.findOne({
         where: { id: music_id, userId: user_id },
         association: 'user',
       });
-      music.set({ name, description, link });
+      music.set({ name, description, link, favorite });
       await music.save();
       return { updatedMusic: music, error: null };
     } catch (error) {

@@ -33,6 +33,10 @@ const User = require('./UserModel');
  *           type: string
  *           description: Music link
  *           example: "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+ *         favorite:
+ *           type: boolean
+ *           description: If this is one of the favorites musics of the user
+ *           example: true
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -99,6 +103,10 @@ const User = require('./UserModel');
  *           type: string
  *           description: Music link
  *           example: "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+ *         favorite:
+ *           type: boolean
+ *           description: If this is one of the favorites musics of the user
+ *           example: true
  */
 
 /**
@@ -125,10 +133,10 @@ const User = require('./UserModel');
  *           type: string
  *           description: Music link
  *           example: "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
- *         category:
- *           type: string
- *           description: Category that this music fits into
- *           example: "Pop"
+ *         favorite:
+ *           type: boolean
+ *           description: If this is one of the favorites musics of the user
+ *           example: true
  */
 
 const Music = sequelize.define('music', {
@@ -174,6 +182,10 @@ const Music = sequelize.define('music', {
         msg: "The link field is mandatory",
       },
     }
+  },
+  favorite: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   },
 });
 

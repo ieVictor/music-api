@@ -50,6 +50,11 @@
             "description": "Music link",
             "example": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
           },
+          "favorite": {
+            "type": "boolean",
+            "description": "If this is one of the favorites musics of the user",
+            "example": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -119,6 +124,11 @@
             "type": "string",
             "description": "Music link",
             "example": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
+          },
+          "favorite": {
+            "type": "boolean",
+            "description": "If this is one of the favorites musics of the user",
+            "example": true
           }
         }
       },
@@ -146,10 +156,10 @@
             "description": "Music link",
             "example": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y"
           },
-          "category": {
-            "type": "string",
-            "description": "Category that this music fits into",
-            "example": "Pop"
+          "favorite": {
+            "type": "boolean",
+            "description": "If this is one of the favorites musics of the user",
+            "example": true
           }
         }
       },
@@ -244,6 +254,26 @@
           }
         }
       },
+      "UserInformations": {
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username of the user",
+            "example": "john_doe"
+          },
+          "musics": {
+            "type": "object",
+            "description": "Musics list of the user",
+            "items": {
+              "$ref": "#/components/schemas/MusicList"
+            }
+          }
+        }
+      },
       "UserList": {
         "type": "object",
         "properties": {
@@ -308,11 +338,6 @@
             "type": "string",
             "description": "Updated password for the user",
             "example": "newpassword123"
-          },
-          "isAdmin": {
-            "type": "boolean",
-            "description": "Indicates if the user is an admin",
-            "example": true
           }
         }
       }
@@ -608,11 +633,11 @@
         }
       }
     },
-    "/music/user?id={userId}": {
+    "/music/user/{userId}": {
       "parameters": [
         {
           "name": "userId",
-          "in": "query",
+          "in": "path",
           "required": true,
           "description": "ID of the user",
           "schema": {
@@ -621,8 +646,80 @@
         }
       ],
       "get": {
-        "summary": "View musics songs by user id",
+        "summary": "View musics by user id",
         "description": "Returns user musics information by id",
+        "tags": [
+          "Music"
+        ],
+        "operationId": "get_musics_by_user_id",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/music/user": {
+      "get": {
+        "summary": "View logged in user musics",
+        "description": "Returns logged in user musics information",
         "tags": [
           "Music"
         ],
@@ -1042,6 +1139,67 @@
       }
     },
     "/user/{userId}": {
+      "parameters": [
+        {
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "description": "ID of the user",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get user informations",
+        "description": "Retrieves user informations & his songs.",
+        "tags": [
+          "User"
+        ],
+        "operationId": "get_all_user_by_id",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInformations"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      },
       "put": {
         "summary": "Update user",
         "description": "Updates information for a specific user by their ID.",
@@ -1137,86 +1295,7 @@
             }
           }
         }
-      }
-    },
-    "/users/admin": {
-      "post": {
-        "summary": "Create a new admin user",
-        "description": "Creates a new admin user. Requires admin privileges.",
-        "tags": [
-          "User"
-        ],
-        "operationId": "create_admin",
-        "security": [
-          {
-            "jwt": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserInsert"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "BadRequest",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BadRequest"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Unauthorized"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Forbidden"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "InternalServerError",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/users/{userId}": {
+      },
       "delete": {
         "summary": "Delete user by ID",
         "description": "Deletes a user by their ID.",
@@ -1287,6 +1366,130 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/music/favorites": {
+      "get": {
+        "summary": "Get logged user favorite musics",
+        "description": "Retrieves a list of user favorite musics.",
+        "tags": [
+          "User"
+        ],
+        "operationId": "get_all_user_favorite_musics",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MusicList"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/admin": {
+      "post": {
+        "summary": "Create a new admin user",
+        "description": "Creates a new admin user. Requires admin privileges.",
+        "tags": [
+          "User"
+        ],
+        "operationId": "create_admin",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInsert"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
                 }
               }
             }

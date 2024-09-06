@@ -5,8 +5,8 @@ class MusicController {
   static async getAllMusics(req, res) {
     const { page = 1, limit = 5 } = req.query;
     const { musics, error: getMusicsError } = await MusicService.getAllMusics(
-      limit,
-      page
+      Number(limit),
+      Number(page)
     );
     if (getMusicsError) return res.status(500).json({ msg: getMusicsError });
     res.status(200).json({
@@ -20,12 +20,34 @@ class MusicController {
 
   static async getUserMusics(req, res) {
     const { page = 1, limit = 5 } = req.query;
-    const id = req.query.id;
+    const userId = req.params.userId;
 
     const { musics, error: getMusicsError } = await MusicService.getUserMusics(
-      id,
-      limit,
-      page
+      userId, 
+      Number(limit),
+      Number(page)
+    );
+    if (!musics) return res.status(404).json({ msg: 'No data found' });
+    if (getMusicsError) return res.status(500).json({ msg: getMusicsError });
+    res.status(200).json({
+      totalMusics: musics.count,
+      totalPages: Math.ceil(musics.count / limit),
+      page: Number(page),
+      limit: Number(limit),
+      data: musics.rows,
+    });
+  }
+
+  static async getLoggedUserMusics(req, res) {
+    const { page = 1, limit = 5 } = req.query;
+    const userId = req.user.id;
+
+    if (!userId) return res.status(403).json({ msg: "You need to be logged in to access this feature"});
+
+    const { musics, error: getMusicsError } = await MusicService.getUserMusics(
+      userId, 
+      Number(limit),
+      Number(page)
     );
     if (!musics) return res.status(404).json({ msg: 'No data found' });
     if (getMusicsError) return res.status(500).json({ msg: getMusicsError });

@@ -36,6 +36,26 @@ const bcrypt = require('bcrypt');
  * @swagger
  * components:
  *   schemas:
+ *     UserInformations:
+ *       type: object
+ *       required:
+ *         - username
+ *       properties:
+ *         username:
+ *           type: string
+ *           description: Username of the user
+ *           example: "john_doe"
+ *         musics:
+ *           type: object
+ *           description: Musics list of the user
+ *           items:
+ *             $ref: "#/components/schemas/MusicList"
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
  *     UserList:
  *       type: object
  *       properties:
@@ -98,10 +118,6 @@ const bcrypt = require('bcrypt');
  *           type: string
  *           description: Updated password for the user
  *           example: "newpassword123"
- *         isAdmin:
- *           type: boolean
- *           description: Indicates if the user is an admin
- *           example: true
  */
 
 const User = sequelize.define('user', {
