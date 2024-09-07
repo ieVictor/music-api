@@ -37,6 +37,10 @@ const User = require('./UserModel');
  *           type: boolean
  *           description: If this is one of the favorites musics of the user
  *           example: true
+ *         views:
+ *           type: integer
+ *           description: Views counter of the music. 
+ *           example: 1240
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -186,6 +190,11 @@ const Music = sequelize.define('music', {
   favorite: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  views: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
   },
 });
 

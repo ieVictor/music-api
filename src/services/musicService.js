@@ -43,10 +43,31 @@ class MusicService {
       const music = await Music.findOne({
         where: { id: music_id },
       });
+
+      music.views++
+      music.save();
+
       return { music, error: null };
     } catch (error) {
       console.error('Error when searching for music by ID: ', error);
       return { music: null, error: 'Internal server error' };
+    }
+  }
+
+  static async getMostViewedMusics(limit, skip) {
+    const limitAllowed = [5, 10, 30];
+    if (!limitAllowed.includes(limit)) limit = 5;
+    const offset = (skip - 1) * limit;
+    try {
+      const musics = await Music.findAndCountAll({
+        limit,
+        offset,
+        order: [[ sequelize.cast(sequelize.col('views'), 'INTEGER'), 'DESC' ]]
+      });
+      return { musics, error: null };
+    } catch (error) {
+      console.error('Error when searching most view musics: ', error);
+      return { musics: null, error: 'Internal Server Error' };
     }
   }
 

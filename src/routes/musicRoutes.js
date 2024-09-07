@@ -49,6 +49,43 @@ router.get('/', MusicController.getAllMusics);
 
 /**
  * @swagger
+ * /music/order/views:
+ *   get:
+ *     summary: View most viewed musics
+ *     description: Returns information about all songs
+ *     tags:
+ *       - Music
+ *     operationId: get_all_music
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/MusicList"
+ *       400:
+ *         description: BadRequest
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadRequest"
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Forbidden"
+ *       500:
+ *         description: InternalServerError
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalServerError"
+ */
+router.get('/order/views', MusicController.getMostViewedMusics);
+
+/**
+ * @swagger
  * /music/user/{userId}:
  *   parameters:
  *     - name: userId

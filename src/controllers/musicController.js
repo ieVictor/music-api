@@ -18,6 +18,22 @@ class MusicController {
     });
   }
 
+  static async getMostViewedMusics(req, res) {
+    const { page = 1, limit = 5 } = req.query;
+    const { musics, error: getMusicsError } = await MusicService.getMostViewedMusics(
+      Number(limit),
+      Number(page)
+    );
+    if (getMusicsError) return res.status(500).json({ msg: getMusicsError });
+    res.status(200).json({
+      totalMusics: musics.count,
+      totalPages: Math.ceil(musics.count / limit),
+      page: Number(page),
+      limit: Number(limit),
+      data: musics.rows,
+    });
+  }
+
   static async getUserMusics(req, res) {
     const { page = 1, limit = 5 } = req.query;
     const userId = req.params.userId;
